@@ -1,0 +1,11 @@
+name: GAN
+params:
+  gen:
+    name: MMCSNGenerator
+    params: {}
+  dis:
+    name: MMCSNDiscriminator
+    params: {}
+  ckpt_file: 'ckpts/CIFAR10/SNGAN_Hinge/ckpt.pth'
+
+

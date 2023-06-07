@@ -1,0 +1,11 @@
+name: GAN
+params:
+  gen:
+    name: MMCDCGenerator
+    params: {}
+  dis:
+    name: MMCDCDiscriminator
+    params: {}
+  ckpt_file: 'ckpts/CIFAR10/DCGAN_NS/ckpt.pth'
+
+

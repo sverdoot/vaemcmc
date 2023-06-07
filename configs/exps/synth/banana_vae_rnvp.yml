@@ -1,0 +1,72 @@
+device: &device cpu
+seed: &seed 42
+
+amb_dim: &amb_dim 256
+manifold_dim: &manifold_dim 32
+lat_dim: &lat_dim 32
+hidden_dim: &hidden_dim 128
+n_blocks: &n_blocks 3
+n_particles: &n_particles 25
+n_chains: &n_chains 10
+burn_in: &burn_in 500
+n_samples: &n_samples 1000
+dummy_noise_scale: &dummy_noise_scale 0.5
+
+train_data: 10000
+batch_size: 32
+n_train_iters: 5000
+
+xlim: [-15, 15]
+ylim: [-4, 4]
+
+
+dist: 
+  name: GaussianEmbedding
+  params:
+    dist:
+      name: Banana
+      params:
+        dim: *manifold_dim
+        sigma: 5.0
+        b: 0.02
+    dim: *amb_dim
+    noise_scale: *dummy_noise_scale
+    seed: *seed
+
+
+mcmc:
+  name: ISIRKernel
+  params:
+    # proposal: null
+    n_particles: *n_particles
+
+
+vae:
+  name: NormalNormalVAE
+  params:
+    encoder: 
+      name: EncoderMLP
+      params:
+        n_in: *amb_dim
+        n_out: *lat_dim
+        n_hid: *hidden_dim
+        n_layers: *n_blocks
+        double_n_out: true
+    decoder:
+      name: DecoderMLP
+      params:
+        n_in: *lat_dim
+        n_out: *amb_dim
+        n_hid: *hidden_dim
+        n_layers: *n_blocks
+        double_n_out: true
+    fix_sigma: false
+
+
+flow:
+  name: RNVP
+  params:
+    dim: *amb_dim
+    num_blocks: *n_blocks
+    hidden_dim: *hidden_dim
+

@@ -1,0 +1,69 @@
+device: &device cpu
+seed: &seed 42
+log_dir: log/cifar_sngan_vae
+
+amb_dim: &amb_dim 128
+lat_dim: &lat_dim 32
+hidden_dim: &hidden_dim 64
+n_blocks: &n_blocks 3
+n_particles: &n_particles 25
+n_chains: &n_chains 10
+burn_in: &burn_in 0
+n_samples: &n_samples 100
+
+train_data: 10000
+batch_size: 32
+n_train_iters: 5000
+
+dist: 
+  name: GANEBM
+  params:
+    gan:
+      name: GAN
+      params:
+        gen:
+          name: MMCSNGenerator
+          params: {}
+        dis:
+          name: MMCSNDiscriminator
+          params: {}
+        ckpt_file: ckpts/CIFAR10/SNGAN_Hinge/ckpt.pth
+
+use_pyro_gt: true
+gt_burn_in: 10
+gt_steps: 10
+gt_chains: 2
+gt_mcmc:
+  name: &name HMC
+  params:
+    full_mass: false
+gt_path: dump/CIFAR10/hmc.pth
+
+mcmc:
+  name: ISIRKernel
+  params:
+    # proposal: null
+    n_particles: *n_particles
+
+
+vae:
+  name: NormalNormalVAE
+  params:
+    encoder: 
+      name: EncoderMLP
+      params:
+        n_in: *amb_dim
+        n_out: *lat_dim
+        n_hid: *hidden_dim
+        n_layers: *n_blocks
+        double_n_out: true
+    decoder:
+      name: DecoderMLP
+      params:
+        n_in: *lat_dim
+        n_out: *amb_dim
+        n_hid: *hidden_dim
+        n_layers: *n_blocks
+        double_n_out: true
+    fix_sigma: false
+

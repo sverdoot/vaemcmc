@@ -1,0 +1,70 @@
+device: &device cpu
+seed: &seed 42
+log_dir: log/ring_vae_rnvp
+
+amb_dim: &amb_dim 128
+# manifold_dim: &manifold_dim 2
+lat_dim: &lat_dim 4
+hidden_dim: &hidden_dim 128
+n_blocks: &n_blocks 2
+n_particles: &n_particles 25
+n_chains: &n_chains 10
+burn_in: &burn_in 500
+n_samples: &n_samples 1000
+dummy_noise_scale: &dummy_noise_scale 1.0
+
+train_data: 10000
+batch_size: 16
+n_train_iters: 10000
+
+xlim: [-8, 8]
+ylim: [-8, 8]
+
+
+dist: 
+  name: GaussianEmbedding
+  params:
+    dist:
+      name: Ring
+      params: {}
+    dim: *amb_dim
+    noise_scale: *dummy_noise_scale
+    seed: *seed
+
+
+mcmc:
+  name: ISIRKernel
+  params:
+    # proposal: null
+    n_particles: *n_particles
+
+
+vae:
+  name: NormalNormalVAE
+  params:
+    encoder: 
+      name: EncoderMLP
+      params:
+        n_in: *amb_dim
+        n_out: *lat_dim
+        n_hid: *hidden_dim
+        n_layers: *n_blocks
+        double_n_out: true
+    decoder:
+      name: DecoderMLP
+      params:
+        n_in: *lat_dim
+        n_out: *amb_dim
+        n_hid: *hidden_dim
+        n_layers: *n_blocks
+        double_n_out: true
+    fix_sigma: false
+
+
+flow:
+  name: RNVP
+  params:
+    dim: *amb_dim
+    num_blocks: *n_blocks
+    hidden_dim: *hidden_dim
+
